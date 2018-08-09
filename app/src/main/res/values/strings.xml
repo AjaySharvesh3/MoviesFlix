@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Movie Flix</string>
+    <string name="title_activity_detailed">Movie Name</string>
+    <string name="action_settings">Share</string>
+    <!-- TODO! Add your API key here! -->
+    <string name="API_key">100e50d1e07c6041c8fc22e7922c4daf</string>
+</resources>
