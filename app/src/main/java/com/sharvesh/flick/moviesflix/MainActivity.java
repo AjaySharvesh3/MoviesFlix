@@ -3,6 +3,7 @@ package com.sharvesh.flick.moviesflix;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -45,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
     public static String[] backdrop;
     public static String[] id;
     public static String last_item;
-    private String MOVIE_URL;
+    //private String MOVIE_URL;
     private static final String LIFE_CYCLE_CALLBACKS="callbacks";
     private URL url;
     private static final String GRID_VIEW_POSITION="gridviewPos";
@@ -53,6 +54,12 @@ public class MainActivity extends AppCompatActivity {
     private GridView gridview;
     public static ContentResolver contentResolver;
     private int gridPos = -1;
+
+    private String MOVIE_URL;
+    private String SORT_BY_POPULAR = "popluar";
+    private String SORT_BY_TOP_RATED = "top_rated";
+    private String SORT_BY_UPCOMING = "upcoming";
+    private String SORT_BY_NOW_PLAYing = "now_playing";
 
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -64,25 +71,37 @@ public class MainActivity extends AppCompatActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_popular:
                     progressBar.setVisibility(View.VISIBLE);
-                    MOVIE_URL="https://api.themoviedb.org/3/movie/popular?api_key="+getResources().getString(R.string.API_key);
+                    //MOVIE_URL="https://api.themoviedb.org/3/movie/popular?api_key="+getResources().getString(R.string.API_key);
+                    SharedPreferences preferences = getPreferences(Context.MODE_PRIVATE);
+                    String sortBy = preferences.getString("SORT_CRITERION_KEY", SORT_BY_POPULAR);
+                    MOVIE_URL="https://api.themoviedb.org/3/movie/" + sortBy +"?api_key=" + getResources().getString(R.string.API_key);
                     doFunctionGrid();
                     gridPos = -1;
                     return true;
                 case R.id.navigation_top_rated:
                     progressBar.setVisibility(View.VISIBLE);
-                    MOVIE_URL="https://api.themoviedb.org/3/movie/top_rated?api_key="+getResources().getString(R.string.API_key);
+                    //MOVIE_URL="https://api.themoviedb.org/3/movie/top_rated?api_key="+getResources().getString(R.string.API_key);
+                    SharedPreferences preferences1 = getPreferences(Context.MODE_PRIVATE);
+                    String sortBy1 = preferences1.getString("SORT_CRITERION_KEY", SORT_BY_TOP_RATED);
+                    MOVIE_URL="https://api.themoviedb.org/3/movie/" + sortBy1 +"?api_key=" + getResources().getString(R.string.API_key);
                     doFunctionGrid();
                     gridPos = -1;
                     return true;
                 case R.id.navigation_now_playing:
                     progressBar.setVisibility(View.VISIBLE);
-                    MOVIE_URL="https://api.themoviedb.org/3/movie/now_playing?api_key="+getResources().getString(R.string.API_key);
+                    //MOVIE_URL="https://api.themoviedb.org/3/movie/now_playing?api_key="+getResources().getString(R.string.API_key);
+                    SharedPreferences preferences2 = getPreferences(Context.MODE_PRIVATE);
+                    String sortBy2 = preferences2.getString("SORT_CRITERION_KEY", SORT_BY_NOW_PLAYing);
+                    MOVIE_URL="https://api.themoviedb.org/3/movie/" + sortBy2 +"?api_key=" + getResources().getString(R.string.API_key);
                     doFunctionGrid();
                     gridPos = -1;
                     return true;
                 case R.id.navigation_up_coming:
                     progressBar.setVisibility(View.VISIBLE);
-                    MOVIE_URL="https://api.themoviedb.org/3/movie/upcoming?api_key="+getResources().getString(R.string.API_key);
+                    //MOVIE_URL="https://api.themoviedb.org/3/movie/upcoming?api_key="+getResources().getString(R.string.API_key);
+                    SharedPreferences preferences3 = getPreferences(Context.MODE_PRIVATE);
+                    String sortBy3 = preferences3.getString("SORT_CRITERION_KEY", SORT_BY_UPCOMING);
+                    MOVIE_URL="https://api.themoviedb.org/3/movie/" + sortBy3 +"?api_key=" + getResources().getString(R.string.API_key);
                     doFunctionGrid();
                     gridPos = -1;
                     return true;
