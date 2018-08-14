@@ -8,26 +8,17 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sharvesh.flick.moviesflix.Utilities.NetworkUtils;
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
     public static String[] poster;
     public static String[] backdrop;
     public static String[] id;
-    public static String last_item;
-    //private String MOVIE_URL;
+        public static String last_item;
+    private String MOVIE_URL;
     private static final String LIFE_CYCLE_CALLBACKS="callbacks";
     private URL url;
     private static final String GRID_VIEW_POSITION="gridviewPos";
@@ -55,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
     public static ContentResolver contentResolver;
     private int gridPos = -1;
 
-    private String MOVIE_URL;
     private String SORT_BY_POPULAR = "popluar";
     private String SORT_BY_TOP_RATED = "top_rated";
     private String SORT_BY_UPCOMING = "upcoming";
@@ -76,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                     String sortBy = preferences.getString("SORT_CRITERION_KEY", SORT_BY_POPULAR);
                     MOVIE_URL="https://api.themoviedb.org/3/movie/" + sortBy +"?api_key=" + getResources().getString(R.string.API_key);
                     doFunctionGrid();
-                    gridPos = -1;
+                    gridPos = 0;
                     return true;
                 case R.id.navigation_top_rated:
                     progressBar.setVisibility(View.VISIBLE);
@@ -85,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
                     String sortBy1 = preferences1.getString("SORT_CRITERION_KEY", SORT_BY_TOP_RATED);
                     MOVIE_URL="https://api.themoviedb.org/3/movie/" + sortBy1 +"?api_key=" + getResources().getString(R.string.API_key);
                     doFunctionGrid();
-                    gridPos = -1;
+                    gridPos = 1;
                     return true;
                 case R.id.navigation_now_playing:
                     progressBar.setVisibility(View.VISIBLE);
@@ -94,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
                     String sortBy2 = preferences2.getString("SORT_CRITERION_KEY", SORT_BY_NOW_PLAYing);
                     MOVIE_URL="https://api.themoviedb.org/3/movie/" + sortBy2 +"?api_key=" + getResources().getString(R.string.API_key);
                     doFunctionGrid();
-                    gridPos = -1;
+                    gridPos = 2;
                     return true;
                 case R.id.navigation_up_coming:
                     progressBar.setVisibility(View.VISIBLE);
@@ -103,12 +93,12 @@ public class MainActivity extends AppCompatActivity {
                     String sortBy3 = preferences3.getString("SORT_CRITERION_KEY", SORT_BY_UPCOMING);
                     MOVIE_URL="https://api.themoviedb.org/3/movie/" + sortBy3 +"?api_key=" + getResources().getString(R.string.API_key);
                     doFunctionGrid();
-                    gridPos = -1;
+                    gridPos = 3;
                     return true;
                 case R.id.navigation_favorite:
                     progressBar.setVisibility(View.VISIBLE);
                     favoriteActivity();
-                    gridPos = -1;
+                    gridPos = 4;
                     return true;
             }
             return false;
@@ -120,16 +110,10 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
         String savedMenuItem=last_item;
         outState.putString(LIFE_CYCLE_CALLBACKS,savedMenuItem+"");
-        outState.putInt(GRID_VIEW_POSITION, gridview.getFirstVisiblePosition());
+        Toast.makeText(this,""+gridPos,Toast.LENGTH_LONG ).show();
+        outState.putInt(GRID_VIEW_POSITION, gridPos);
     }
 
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        String savedMenuItem=last_item;
-        savedInstanceState.putString(LIFE_CYCLE_CALLBACKS,savedMenuItem+"");
-        savedInstanceState.putInt(GRID_VIEW_POSITION, gridview.getFirstVisiblePosition());
-    }
 
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager
@@ -137,66 +121,66 @@ public class MainActivity extends AppCompatActivity {
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
-
+    BottomNavigationView navigation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BottomNavigationView navigation = findViewById(R.id.navigation);
+        navigation = findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+
+
         progressBar = findViewById(R.id.progressbar);
         contentResolver = MainActivity.this.getContentResolver();
         DetailedActivity.mdb.getFavoriteMovies(contentResolver);
         gridview = findViewById(R.id.gridview);
 
         if(isNetworkAvailable()) {
-            MOVIE_URL = "https://api.themoviedb.org/3/movie/popular?api_key=" + getResources().getString(R.string.API_key);
-            doFunctionGrid();
-            if (savedInstanceState != null) {
-                if (savedInstanceState.containsKey(LIFE_CYCLE_CALLBACKS)) {
-                    String allPreviousLifecycleCallbacks = savedInstanceState
-                            .getString(LIFE_CYCLE_CALLBACKS);
-                    if (allPreviousLifecycleCallbacks.equals("null")) {
-                        MOVIE_URL = "https://api.themoviedb.org/3/movie/popular?api_key=" + getResources().getString(R.string.API_key);
-                        doFunctionGrid();
-                    } else {
-                        int gotID = Integer.parseInt(allPreviousLifecycleCallbacks);
-                        switch (gotID) {
-                            case 2131230838:
-                                progressBar.setVisibility(View.VISIBLE);
-                                MOVIE_URL = "https://api.themoviedb.org/3/movie/popular?api_key=" + getResources().getString(R.string.API_key);
-                                doFunctionGrid();
 
-                                break;
-                            case 2131230839:
-                                progressBar.setVisibility(View.VISIBLE);
-                                MOVIE_URL = "https://api.themoviedb.org/3/movie/top_rated?api_key=" + getResources().getString(R.string.API_key);
-                                doFunctionGrid();
-                                break;
-                            case 2131230840:
-                                progressBar.setVisibility(View.VISIBLE);
-                                MOVIE_URL = "https://api.themoviedb.org/3/movie/now_playing?api_key=" + getResources().getString(R.string.API_key);
-                                doFunctionGrid();
-                                break;
-                            case 2131230841:
-                                progressBar.setVisibility(View.VISIBLE);
-                                MOVIE_URL = "https://api.themoviedb.org/3/movie/upcoming?api_key=" + getResources().getString(R.string.API_key);
-                                doFunctionGrid();
-                                break;
-                            case 2131230842:
-                                progressBar.setVisibility(View.VISIBLE);
-                                //MOVIE_URL = "https://api.themoviedb.org/3/movie/upcoming?api_key=" + getResources().getString(R.string.API_key);
-                                favoriteActivity();
-                                break;
-                        }
-                    }
-                }
-                if(savedInstanceState.containsKey(GRID_VIEW_POSITION)){
-                    gridPos = savedInstanceState.getInt(GRID_VIEW_POSITION);
-                }
+            if(savedInstanceState != null && savedInstanceState.containsKey(GRID_VIEW_POSITION)) {
+
+                gridPos = savedInstanceState.getInt(GRID_VIEW_POSITION);
             }
+
+            switch (gridPos) {
+                case 0:
+
+                    Toast.makeText(this,""+gridPos,Toast.LENGTH_LONG ).show();
+                    progressBar.setVisibility(View.VISIBLE);
+                    MOVIE_URL = "https://api.themoviedb.org/3/movie/popular?api_key=" + getResources().getString(R.string.API_key);
+                    doFunctionGrid();
+
+                    break;
+                case 1:
+                    progressBar.setVisibility(View.VISIBLE);
+                    MOVIE_URL = "https://api.themoviedb.org/3/movie/top_rated?api_key=" + getResources().getString(R.string.API_key);
+                    doFunctionGrid();
+                    break;
+                case 2:
+                    progressBar.setVisibility(View.VISIBLE);
+                    MOVIE_URL = "https://api.themoviedb.org/3/movie/now_playing?api_key=" + getResources().getString(R.string.API_key);
+                    doFunctionGrid();
+                    break;
+                case 3:
+                    progressBar.setVisibility(View.VISIBLE);
+                    MOVIE_URL = "https://api.themoviedb.org/3/movie/upcoming?api_key=" + getResources().getString(R.string.API_key);
+                    doFunctionGrid();
+                    break;
+                case 4:
+                    progressBar.setVisibility(View.VISIBLE);
+                    //MOVIE_URL = "https://api.themoviedb.org/3/movie/upcoming?api_key=" + getResources().getString(R.string.API_key);
+                    favoriteActivity();
+                    break;
+
+                default:
+                    progressBar.setVisibility(View.VISIBLE);
+                    MOVIE_URL = "https://api.themoviedb.org/3/movie/popular?api_key=" + getResources().getString(R.string.API_key);
+                    doFunctionGrid();
+                    break;
+            }
+//            }
         }else {
             progressBar.setVisibility(View.INVISIBLE);
             Toast.makeText(MainActivity.this,"Network Error..", Toast.LENGTH_LONG).show();
